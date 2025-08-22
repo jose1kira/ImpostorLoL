@@ -15,19 +15,43 @@ function App() {
   useEffect(() => {
     // Set up MQTT event handlers
     mqttService.on('gameState', (state: GameState) => {
+      console.log('Received game state update:', state);
       setGameState(state);
     });
 
     mqttService.on('players', (players: Player[]) => {
+      console.log('Received players update:', players);
       if (gameState) {
         setGameState({ ...gameState, players });
+      }
+    });
+
+    mqttService.on('requestState', (request: any) => {
+      console.log('Received state request:', request);
+      if (gameState && currentPlayer && currentPlayer.isHost) {
+        // Add the new player to the game
+        const newPlayer: Player = {
+          id: request.playerId,
+          name: request.playerName,
+          isHost: false,
+          isAlive: true,
+          role: 'champion'
+        };
+        
+        const updatedPlayers = [...gameState.players, newPlayer];
+        const updatedState = { ...gameState, players: updatedPlayers };
+        
+        setGameState(updatedState);
+        // Publish the updated state to all players
+        mqttService.publishGameState(updatedState);
+        mqttService.publishPlayerUpdate(updatedPlayers);
       }
     });
 
     return () => {
       mqttService.disconnect();
     };
-  }, [gameState]);
+  }, [gameState, currentPlayer]);
 
   const handleCreateGame = async (playerName: string) => {
     const player: Player = {
@@ -45,7 +69,12 @@ function App() {
     try {
       await mqttService.connect(newGameState.id, player.id);
       setIsConnected(true);
+      
+      // Publish initial game state and player list
       mqttService.publishGameState(newGameState);
+      mqttService.publishPlayerUpdate(newGameState.players);
+      
+      console.log('Game created and published:', newGameState);
     } catch (error) {
       console.error('Failed to connect to MQTT:', error);
     }
@@ -66,14 +95,30 @@ function App() {
       await mqttService.connect(gameId, player.id);
       setIsConnected(true);
       
-      // Join the game
-      if (gameService.joinGame(player)) {
-        const updatedState = gameService.getGameState();
-        if (updatedState) {
-          setGameState(updatedState);
-          mqttService.publishPlayerUpdate(updatedState.players);
+      // Request current game state from host
+      mqttService.publishRequestState({ 
+        playerId: player.id,
+        playerName: player.name 
+      });
+      
+      // Wait a bit for the host to respond
+      setTimeout(() => {
+        // If no game state received, create a minimal one
+        if (!gameState) {
+          const minimalState: GameState = {
+            id: gameId,
+            status: 'lobby',
+            players: [player],
+            currentRound: 1,
+            secretChampion: '',
+            roundTimer: 0,
+            discussionTime: 120,
+            votingTime: 30
+          };
+          setGameState(minimalState);
         }
-      }
+      }, 1000);
+      
     } catch (error) {
       console.error('Failed to connect to MQTT:', error);
     }

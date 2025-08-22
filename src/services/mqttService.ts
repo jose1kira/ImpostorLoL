@@ -74,6 +74,8 @@ class MQTTService {
         this.notifyHandlers('chat', data);
       } else if (topicType === 'players') {
         this.notifyHandlers('players', data);
+      } else if (topicType === 'requestState') {
+        this.notifyHandlers('requestState', data);
       }
     } catch (error) {
       console.error('Error parsing MQTT message:', error);
@@ -90,6 +92,19 @@ class MQTTService {
 
   publishPlayerUpdate(players: Player[]) {
     this.publish(`${this.TOPIC_PREFIX}/${this.gameId}/players`, players);
+  }
+
+  publishRequestState(request: any) {
+    this.publish(`${this.TOPIC_PREFIX}/${this.gameId}/requestState`, request);
+  }
+
+  getTopicPrefix(): string {
+    return this.TOPIC_PREFIX;
+  }
+
+  // Public publish method for custom topics
+  publishToTopic(topic: string, message: any) {
+    this.publish(topic, message);
   }
 
   private publish(topic: string, message: any) {
