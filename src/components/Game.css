@@ -1,0 +1,249 @@
+.game {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--secondary);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid var(--primary);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.game-info {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.game-id-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.game-id-label {
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 0.9rem;
+}
+
+.game-id-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.game-id {
+  background: var(--background-light);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+}
+
+.copy-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+  background: var(--background-light);
+  transform: scale(1.1);
+}
+
+.copied-message {
+  color: var(--success);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.game-phase-info {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.phase-indicator,
+.timer,
+.round-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.phase-label,
+.timer-label,
+.round-label {
+  font-size: 0.8rem;
+  color: var(--text-dark);
+  font-weight: 500;
+}
+
+.phase-name {
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 4px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.phase-name.lobby {
+  background: var(--background-light);
+  color: var(--text);
+}
+
+.phase-name.discussion {
+  background: var(--warning);
+  color: var(--background);
+}
+
+.phase-name.voting {
+  background: var(--danger);
+  color: white;
+}
+
+.phase-name.elimination {
+  background: var(--accent);
+  color: var(--background);
+}
+
+.phase-name.gameOver {
+  background: var(--secondary-light);
+  color: var(--text);
+}
+
+.timer-value {
+  font-weight: 700;
+  font-size: 1.2rem;
+  font-family: 'Courier New', monospace;
+  color: var(--text);
+}
+
+.timer-value.urgent {
+  color: var(--danger);
+  animation: pulse 1s infinite;
+}
+
+.round-value {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--primary);
+}
+
+.leave-game-btn {
+  background: var(--danger);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.leave-game-btn:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.game-content {
+  min-height: 60vh;
+}
+
+.connection-warning {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--warning);
+  color: var(--background);
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 20px rgba(251, 191, 36, 0.3);
+  z-index: 1000;
+}
+
+.warning-icon {
+  font-size: 1.2rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .game {
+    padding: 10px;
+  }
+  
+  .game-header {
+    flex-direction: column;
+    gap: 20px;
+    align-items: stretch;
+  }
+  
+  .game-info {
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+  }
+  
+  .game-phase-info {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .phase-indicator,
+  .timer,
+  .round-info {
+    flex-direction: row;
+    gap: 8px;
+  }
+  
+  .leave-game-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-header {
+    padding: 16px;
+  }
+  
+  .game-id {
+    font-size: 1rem;
+    padding: 6px 10px;
+  }
+  
+  .phase-name {
+    font-size: 0.9rem;
+    padding: 3px 10px;
+  }
+  
+  .timer-value,
+  .round-value {
+    font-size: 1rem;
+  }
+}

@@ -1,0 +1,416 @@
+.game-over {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 60vh;
+}
+
+.game-over-content {
+  max-width: 900px;
+  width: 100%;
+}
+
+.game-over-header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: var(--secondary);
+  border-radius: 16px;
+  border: 1px solid var(--secondary-light);
+}
+
+.game-over-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+.game-over-subtitle {
+  font-size: 1.2rem;
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+.winner-announcement {
+  text-align: center;
+  margin-bottom: 32px;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.winner-announcement.success {
+  background: linear-gradient(135deg, var(--success) 0%, rgba(74, 222, 128, 0.1) 100%);
+  border: 3px solid var(--success);
+  color: white;
+}
+
+.winner-announcement.danger {
+  background: linear-gradient(135deg, var(--danger) 0%, rgba(239, 68, 68, 0.1) 100%);
+  border: 3px solid var(--danger);
+  color: white;
+}
+
+.winner-icon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.winner-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.winner-subtitle {
+  font-size: 1.3rem;
+  margin-bottom: 16px;
+  opacity: 0.9;
+}
+
+.winner-description {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  opacity: 0.8;
+}
+
+.player-result {
+  margin-bottom: 32px;
+}
+
+.result-card {
+  background: var(--secondary);
+  border: 2px solid;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.result-card.winner {
+  border-color: var(--success);
+  background: linear-gradient(135deg, var(--secondary) 0%, rgba(74, 222, 128, 0.1) 100%);
+}
+
+.result-card.loser {
+  border-color: var(--danger);
+  background: linear-gradient(135deg, var(--secondary) 0%, rgba(239, 68, 68, 0.1) 100%);
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.result-icon {
+  font-size: 2.5rem;
+}
+
+.result-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.result-details p {
+  margin-bottom: 8px;
+  color: var(--text-dark);
+  line-height: 1.5;
+}
+
+.result-details strong {
+  color: var(--text);
+}
+
+.final-game-stats {
+  margin-bottom: 32px;
+}
+
+.final-game-stats h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text);
+  text-align: center;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.stat-item {
+  background: var(--secondary);
+  border: 1px solid var(--secondary-light);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text-dark);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+  font-family: 'Courier New', monospace;
+}
+
+.stat-value.success {
+  color: var(--success);
+}
+
+.stat-value.danger {
+  color: var(--danger);
+}
+
+.player-roles-reveal {
+  margin-bottom: 32px;
+}
+
+.player-roles-reveal h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text);
+  text-align: center;
+}
+
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.role-card {
+  background: var(--secondary);
+  border: 2px solid var(--secondary-light);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.role-card.champion {
+  border-color: var(--success);
+}
+
+.role-card.impostor {
+  border-color: var(--danger);
+}
+
+.role-card.current {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, var(--secondary) 0%, rgba(201, 170, 113, 0.1) 100%);
+}
+
+.role-icon {
+  font-size: 2rem;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background-light);
+  border-radius: 50%;
+  margin-bottom: 16px;
+}
+
+.role-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.player-name {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 1.1rem;
+}
+
+.role-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  align-self: flex-start;
+}
+
+.role-badge.champion {
+  background: var(--success);
+  color: white;
+}
+
+.role-badge.impostor {
+  background: var(--danger);
+  color: white;
+}
+
+.current-badge {
+  background: var(--primary);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  align-self: flex-start;
+}
+
+.host-badge {
+  background: var(--accent);
+  color: var(--background);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  align-self: flex-start;
+}
+
+.champion-secret {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--success);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px;
+  background: var(--background-light);
+  border-radius: 6px;
+  border: 1px solid var(--success);
+  text-align: center;
+}
+
+.game-over-actions {
+  margin-bottom: 32px;
+}
+
+.actions-content {
+  text-align: center;
+  padding: 32px;
+  background: var(--secondary);
+  border-radius: 16px;
+  border: 1px solid var(--primary);
+}
+
+.actions-content h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.action-hint {
+  color: var(--text-dark);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.game-over-footer {
+  text-align: center;
+  padding: 24px;
+  background: var(--background-light);
+  border-radius: 12px;
+  border: 1px solid var(--secondary-light);
+}
+
+.footer-text {
+  font-size: 1.1rem;
+  color: var(--text);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.footer-subtext {
+  color: var(--text-dark);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .game-over-title {
+    font-size: 2rem;
+  }
+  
+  .winner-title {
+    font-size: 2rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+  }
+  
+  .roles-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .winner-icon {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-over-title {
+    font-size: 1.5rem;
+  }
+  
+  .winner-title {
+    font-size: 1.5rem;
+  }
+  
+  .winner-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .roles-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .role-card {
+    padding: 16px;
+  }
+  
+  .actions-content {
+    padding: 20px;
+  }
+  
+  .winner-icon {
+    font-size: 2.5rem;
+  }
+}
