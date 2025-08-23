@@ -62,24 +62,6 @@ function App() {
     };
   }, [gameState, currentPlayer]);
 
-  const handleCreateGame = async (playerName: string) => {
-    const player: Player = {
-      id: `player-${Date.now()}`,
-      name: playerName,
-      isHost: true,
-      isAlive: true,
-      role: 'champion'
-    };
-
-    setCurrentPlayer(player);
-    const newGameState = gameService.createGame(player);
-    setGameState(newGameState);
-
-    // Publish initial game state to global lobby
-    mqttService.publishGameState(newGameState);
-    console.log('Game created and published to global lobby:', newGameState);
-  };
-
   const handleJoinGame = async (playerName: string) => {
     const player: Player = {
       id: `player-${Date.now()}`,
@@ -101,7 +83,8 @@ function App() {
       mqttService.publishPlayerJoined(player);
       mqttService.publishGameState(updatedState);
     } else {
-      // Create a new game if none exists
+      // Create a new game if none exists (first player becomes host)
+      player.isHost = true;
       const newGameState = gameService.createGame(player);
       setGameState(newGameState);
       mqttService.publishGameState(newGameState);
@@ -181,7 +164,6 @@ function App() {
             transition={{ duration: 0.3 }}
           >
             <Lobby
-              onCreateGame={handleCreateGame}
               onJoinGame={handleJoinGame}
             />
           </motion.div>
