@@ -28,7 +28,6 @@ const Game: React.FC<GameProps> = ({
   onGameOver
 }) => {
   const [currentPhase, setCurrentPhase] = useState<GamePhase>('lobby');
-  const [showGameId, setShowGameId] = useState(false);
 
   useEffect(() => {
     // Determine current phase based on game state
@@ -104,32 +103,9 @@ const Game: React.FC<GameProps> = ({
         transition={{ duration: 0.5 }}
       >
         <div className="game-info">
-          <div className="game-id-section">
-            <span className="game-id-label">Game ID:</span>
-            <div className="game-id-container">
-              <span className="game-id">{gameState.id.substring(0, 8).toUpperCase()}</span>
-              <button
-                className="copy-btn"
-                onClick={() => {
-                  navigator.clipboard.writeText(gameState.id.substring(0, 8).toUpperCase());
-                  setShowGameId(true);
-                  setTimeout(() => setShowGameId(false), 2000);
-                }}
-                title="Copy Game ID"
-              >
-                📋
-              </button>
-            </div>
-            {showGameId && (
-              <motion.span
-                className="copied-message"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-              >
-                Copied!
-              </motion.span>
-            )}
+          <div className="game-status-section">
+            <span className="status-label">Status:</span>
+            <span className="status-value">Global Lobby</span>
           </div>
           
           {gameState.status !== 'lobby' && (

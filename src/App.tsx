@@ -13,38 +13,47 @@ function App() {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    // Connect to global lobby
+    const connectToLobby = async () => {
+      try {
+        await mqttService.connect();
+        setIsConnected(true);
+        console.log('Connected to global lobby');
+      } catch (error) {
+        console.error('Failed to connect to lobby:', error);
+      }
+    };
+
+    connectToLobby();
+
     // Set up MQTT event handlers
     mqttService.on('gameState', (state: GameState) => {
       console.log('Received game state update:', state);
       setGameState(state);
     });
 
-    mqttService.on('players', (players: Player[]) => {
-      console.log('Received players update:', players);
-      if (gameState) {
-        setGameState({ ...gameState, players });
+    mqttService.on('playerJoined', (player: Player) => {
+      console.log('Player joined:', player);
+      if (gameState && currentPlayer && currentPlayer.isHost) {
+        // Add the new player to the game
+        const updatedPlayers = [...gameState.players, player];
+        const updatedState = { ...gameState, players: updatedPlayers };
+        setGameState(updatedState);
+        
+        // Publish the updated state to all players
+        mqttService.publishGameState(updatedState);
       }
     });
 
-    mqttService.on('requestState', (request: any) => {
-      console.log('Received state request:', request);
-      if (gameState && currentPlayer && currentPlayer.isHost) {
-        // Add the new player to the game
-        const newPlayer: Player = {
-          id: request.playerId,
-          name: request.playerName,
-          isHost: false,
-          isAlive: true,
-          role: 'champion'
-        };
-        
-        const updatedPlayers = [...gameState.players, newPlayer];
+    mqttService.on('playerLeft', (data: { playerId: string }) => {
+      console.log('Player left:', data.playerId);
+      if (gameState) {
+        const updatedPlayers = gameState.players.filter(p => p.id !== data.playerId);
         const updatedState = { ...gameState, players: updatedPlayers };
-        
         setGameState(updatedState);
+        
         // Publish the updated state to all players
         mqttService.publishGameState(updatedState);
-        mqttService.publishPlayerUpdate(updatedPlayers);
       }
     });
 
@@ -66,21 +75,12 @@ function App() {
     const newGameState = gameService.createGame(player);
     setGameState(newGameState);
 
-    try {
-      await mqttService.connect(newGameState.id, player.id);
-      setIsConnected(true);
-      
-      // Publish initial game state and player list
-      mqttService.publishGameState(newGameState);
-      mqttService.publishPlayerUpdate(newGameState.players);
-      
-      console.log('Game created and published:', newGameState);
-    } catch (error) {
-      console.error('Failed to connect to MQTT:', error);
-    }
+    // Publish initial game state to global lobby
+    mqttService.publishGameState(newGameState);
+    console.log('Game created and published to global lobby:', newGameState);
   };
 
-  const handleJoinGame = async (gameId: string, playerName: string) => {
+  const handleJoinGame = async (playerName: string) => {
     const player: Player = {
       id: `player-${Date.now()}`,
       name: playerName,
@@ -91,36 +91,20 @@ function App() {
 
     setCurrentPlayer(player);
 
-    try {
-      await mqttService.connect(gameId, player.id);
-      setIsConnected(true);
+    // If there's already a game, join it
+    if (gameState) {
+      const updatedPlayers = [...gameState.players, player];
+      const updatedState = { ...gameState, players: updatedPlayers };
+      setGameState(updatedState);
       
-      // Request current game state from host
-      mqttService.publishRequestState({ 
-        playerId: player.id,
-        playerName: player.name 
-      });
-      
-      // Wait a bit for the host to respond
-      setTimeout(() => {
-        // If no game state received, create a minimal one
-        if (!gameState) {
-          const minimalState: GameState = {
-            id: gameId,
-            status: 'lobby',
-            players: [player],
-            currentRound: 1,
-            secretChampion: '',
-            roundTimer: 0,
-            discussionTime: 120,
-            votingTime: 30
-          };
-          setGameState(minimalState);
-        }
-      }, 1000);
-      
-    } catch (error) {
-      console.error('Failed to connect to MQTT:', error);
+      // Publish player joined and updated state
+      mqttService.publishPlayerJoined(player);
+      mqttService.publishGameState(updatedState);
+    } else {
+      // Create a new game if none exists
+      const newGameState = gameService.createGame(player);
+      setGameState(newGameState);
+      mqttService.publishGameState(newGameState);
     }
   };
 
@@ -146,15 +130,22 @@ function App() {
 
   const handleLeaveGame = () => {
     if (currentPlayer && gameState) {
-      gameService.leaveGame(currentPlayer.id);
-      mqttService.publishPlayerUpdate(gameState.players);
+      // Notify other players that this player left
+      mqttService.publishPlayerLeft(currentPlayer.id);
+      
+      // Remove player from local state
+      const updatedPlayers = gameState.players.filter(p => p.id !== currentPlayer.id);
+      if (updatedPlayers.length > 0) {
+        const updatedState = { ...gameState, players: updatedPlayers };
+        setGameState(updatedState);
+        mqttService.publishGameState(updatedState);
+      } else {
+        // No players left, reset game
+        setGameState(null);
+      }
     }
     
-    mqttService.disconnect();
-    gameService.resetGame();
-    setGameState(null);
     setCurrentPlayer(null);
-    setIsConnected(false);
   };
 
   const handleGameOver = () => {
@@ -223,7 +214,7 @@ function App() {
           transition={{ duration: 0.3 }}
         >
           <div className="status-dot"></div>
-          Connected
+          Connected to Global Lobby
         </motion.div>
       )}
     </div>
