@@ -93,7 +93,12 @@ class MQTTService {
 
   private publish(topic: string, message: any) {
     if (this.client && this.client.connected) {
-      this.client.publish(topic, JSON.stringify(message), { qos: 1 });
+      // Use QoS 1 for reliable delivery of important game state messages
+      const qos = message.type === 'gameState' ? 1 : 1;
+      this.client.publish(topic, JSON.stringify(message), { qos });
+      console.log(`Published ${message.type} message to ${topic}`);
+    } else {
+      console.warn('Cannot publish message: MQTT client not connected');
     }
   }
 

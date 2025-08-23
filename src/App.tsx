@@ -30,12 +30,18 @@ function App() {
     mqttService.on('gameState', (state: GameState) => {
       console.log('Received game state update:', state);
       console.log('Current game state:', gameState);
-      // Only update if the received state has more players or is different
-      if (!gameState || state.players.length > gameState.players.length || state.id !== gameState.id) {
+      
+      // Always update if it's a different game or has different content
+      if (!gameState || 
+          state.id !== gameState.id || 
+          state.players.length !== gameState.players.length ||
+          state.status !== gameState.status ||
+          state.currentRound !== gameState.currentRound ||
+          state.roundTimer !== gameState.roundTimer) {
         console.log('Updating game state to:', state);
         setGameState(state);
       } else {
-        console.log('Ignoring game state update (no change)');
+        console.log('Ignoring game state update (no significant change)');
       }
     });
 
@@ -44,30 +50,40 @@ function App() {
       console.log('Current game state:', gameState);
       console.log('Current player:', currentPlayer);
       
-      if (gameState && currentPlayer && currentPlayer.isHost) {
-        console.log('Host processing player join');
-        // Add the new player to the game
-        const updatedPlayers = [...gameState.players, player];
-        const updatedState = { ...gameState, players: updatedPlayers };
-        setGameState(updatedState);
-        
-        // Publish the updated state to all players
-        mqttService.publishGameState(updatedState);
-        console.log('Published updated state with players:', updatedPlayers);
+      if (gameState) {
+        // ALL players should process player joins, not just host
+        // Check if player already exists to avoid duplicates
+        if (!gameState.players.find(p => p.id === player.id)) {
+          console.log('Adding new player to game');
+          const updatedPlayers = [...gameState.players, player];
+          const updatedState = { ...gameState, players: updatedPlayers };
+          setGameState(updatedState);
+          
+          // Only host publishes the updated state to avoid infinite loops
+          if (currentPlayer && currentPlayer.isHost) {
+            mqttService.publishGameState(updatedState);
+            console.log('Published updated state with players:', updatedPlayers);
+          }
+        } else {
+          console.log('Player already exists in game, ignoring duplicate');
+        }
       } else {
-        console.log('Not host or no game state, ignoring player join event');
+        console.log('No game state, ignoring player join event');
       }
     });
 
     mqttService.on('playerLeft', (data: { playerId: string }) => {
       console.log('Player left:', data.playerId);
       if (gameState) {
+        // ALL players should process player leaves, not just host
         const updatedPlayers = gameState.players.filter(p => p.id !== data.playerId);
         const updatedState = { ...gameState, players: updatedPlayers };
         setGameState(updatedState);
         
-        // Publish the updated state to all players
-        mqttService.publishGameState(updatedState);
+        // Only host publishes the updated state to avoid infinite loops
+        if (currentPlayer && currentPlayer.isHost) {
+          mqttService.publishGameState(updatedState);
+        }
       }
     });
 
@@ -78,7 +94,7 @@ function App() {
 
   const handleJoinGame = async (playerName: string) => {
     const player: Player = {
-      id: `player-${Date.now()}`,
+      id: `player-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: playerName,
       isHost: false,
       isAlive: true,
@@ -94,14 +110,20 @@ function App() {
     if (gameState && gameState.players.length > 0) {
       console.log('Joining existing game with players:', gameState.players);
       
-      // Add the new player to the existing game
-      const updatedPlayers = [...gameState.players, player];
-      const updatedState = { ...gameState, players: updatedPlayers };
-      setGameState(updatedState);
-      
-      // Publish player joined and updated state
-      mqttService.publishPlayerJoined(player);
-      mqttService.publishGameState(updatedState);
+      // Check if player already exists to avoid duplicates
+      if (!gameState.players.find(p => p.id === player.id)) {
+        // Add the new player to the existing game
+        const updatedPlayers = [...gameState.players, player];
+        const updatedState = { ...gameState, players: updatedPlayers };
+        setGameState(updatedState);
+        
+        // Publish player joined and updated state
+        mqttService.publishPlayerJoined(player);
+        mqttService.publishGameState(updatedState);
+        console.log('Successfully joined existing game');
+      } else {
+        console.log('Player already exists in game');
+      }
     } else {
       // Create a new game if none exists (first player becomes host)
       console.log('Creating new game as first player');
@@ -109,6 +131,7 @@ function App() {
       const newGameState = gameService.createGame(player);
       setGameState(newGameState);
       mqttService.publishGameState(newGameState);
+      console.log('Successfully created new game');
     }
   };
 
@@ -134,6 +157,8 @@ function App() {
 
   const handleLeaveGame = () => {
     if (currentPlayer && gameState) {
+      console.log('Player leaving game:', currentPlayer.name);
+      
       // Notify other players that this player left
       mqttService.publishPlayerLeft(currentPlayer.id);
       
@@ -142,14 +167,20 @@ function App() {
       if (updatedPlayers.length > 0) {
         const updatedState = { ...gameState, players: updatedPlayers };
         setGameState(updatedState);
-        mqttService.publishGameState(updatedState);
+        
+        // Only publish if we're the host to avoid loops
+        if (currentPlayer.isHost) {
+          mqttService.publishGameState(updatedState);
+        }
       } else {
         // No players left, reset game
+        console.log('No players left, resetting game');
         setGameState(null);
       }
     }
     
     setCurrentPlayer(null);
+    console.log('Successfully left game');
   };
 
   const handleGameOver = () => {
