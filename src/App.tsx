@@ -29,12 +29,23 @@ function App() {
     // Set up MQTT event handlers
     mqttService.on('gameState', (state: GameState) => {
       console.log('Received game state update:', state);
-      setGameState(state);
+      console.log('Current game state:', gameState);
+      // Only update if the received state has more players or is different
+      if (!gameState || state.players.length > gameState.players.length || state.id !== gameState.id) {
+        console.log('Updating game state to:', state);
+        setGameState(state);
+      } else {
+        console.log('Ignoring game state update (no change)');
+      }
     });
 
     mqttService.on('playerJoined', (player: Player) => {
-      console.log('Player joined:', player);
+      console.log('Player joined event received:', player);
+      console.log('Current game state:', gameState);
+      console.log('Current player:', currentPlayer);
+      
       if (gameState && currentPlayer && currentPlayer.isHost) {
+        console.log('Host processing player join');
         // Add the new player to the game
         const updatedPlayers = [...gameState.players, player];
         const updatedState = { ...gameState, players: updatedPlayers };
@@ -42,6 +53,9 @@ function App() {
         
         // Publish the updated state to all players
         mqttService.publishGameState(updatedState);
+        console.log('Published updated state with players:', updatedPlayers);
+      } else {
+        console.log('Not host or no game state, ignoring player join event');
       }
     });
 
@@ -73,8 +87,14 @@ function App() {
 
     setCurrentPlayer(player);
 
+    // Wait a bit for MQTT connection to be fully established
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     // If there's already a game, join it
-    if (gameState) {
+    if (gameState && gameState.players.length > 0) {
+      console.log('Joining existing game with players:', gameState.players);
+      
+      // Add the new player to the existing game
       const updatedPlayers = [...gameState.players, player];
       const updatedState = { ...gameState, players: updatedPlayers };
       setGameState(updatedState);
@@ -84,6 +104,7 @@ function App() {
       mqttService.publishGameState(updatedState);
     } else {
       // Create a new game if none exists (first player becomes host)
+      console.log('Creating new game as first player');
       player.isHost = true;
       const newGameState = gameService.createGame(player);
       setGameState(newGameState);
